@@ -23,11 +23,11 @@ export class MarcaCarroService {
     return marcas.map(marca => ({
       codigo: marca.make_id,
       nome: marca.make_display
-    }))
+    }));
   }
   public getMarcas(): Observable<MarcaCarro[]> {
     return this.http.jsonp(this.API_CARROS, 'callback').pipe(
-      map((res: CarResponse) => this.mapMarcas(res.Makes))
+      map((res: any) => this.mapMarcas(res.Makes))
     )
   }
 }
