@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { MarcaCarro } from 'src/app/models/marcaCarro';
 import { Seguro } from 'src/app/models/Seguro';
 import { MarcaCarroService } from 'src/app/services/marca-carro.service';
+import { SeguroService } from 'src/app/services/seguro.service';
 
 @Component({
   selector: 'app-cadastro-seguro',
@@ -15,11 +16,16 @@ export class CadastroSeguroComponent implements OnInit {
   public marcasCarro$!: Observable<MarcaCarro[]>
 
   constructor(
-    private marcaCarroService: MarcaCarroService
+    private marcaCarroService: MarcaCarroService,
+    private seguroService: SeguroService
   ) { }
 
   ngOnInit() {
     this.marcasCarro$ = this.marcaCarroService.getMarcas();
+  }
+
+  cadastrar() {
+    this.seguroService.cadastrar(this.seguro);
   }
 
 }

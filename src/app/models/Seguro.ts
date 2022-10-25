@@ -2,7 +2,7 @@ import { MarcaCarro } from "./marcaCarro";
 
 export class Seguro {
     marcaCarro!: MarcaCarro;
-    nomeProprietário!: string;
+    nomeProprietario!: string;
     modeloCarro!: string;
     sobrenomeProprietario!: string;
     placaCarro!: string;
