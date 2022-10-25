@@ -26,6 +26,7 @@ export class CadastroSeguroComponent implements OnInit {
 
   cadastrar() {
     this.seguroService.cadastrar(this.seguro);
+    this.seguro.id = this.seguro.placaCarro
   }
 
 }

@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import Dexie from 'dexie';
 import { Observable } from 'rxjs';
 import { Seguro } from '../models/Seguro';
 import { OnlineOfflineService } from './online-offline.service';
@@ -10,6 +11,8 @@ import { OnlineOfflineService } from './online-offline.service';
 export class SeguroService {
 
   private API_SEGUROS = 'http://localhost:9000'
+  private db!: Dexie
+  private table!: Dexie.Table<Seguro, any>
 
 
   constructor(
@@ -17,6 +20,16 @@ export class SeguroService {
     private onlineOfflineService: OnlineOfflineService
   ) { 
     this.ouvirStatusConexao();
+    this.iniciarIndexedDb();
+  }
+
+  private iniciarIndexedDb() {
+    this.db = new Dexie('db-seguros');
+    this.db.version(1).stores({
+      seguro: 'id'
+    });
+
+    this.table = this.db.table('seguro')
   }
 
   private salvarAPI(seguro: Seguro) {
@@ -27,11 +40,30 @@ export class SeguroService {
       )
   }
 
+  private async salvarIndexedDb(seguro: Seguro) {
+    try{
+      await this.table.add(seguro)
+      const todosSeguros: Seguro[] = await this.table.toArray()
+      console.log('Seguro foi salvo no IndexedDb', todosSeguros)
+    } catch (error) {
+      console.log('Erro ao incluir seguro ao indexedDb', error)
+    }
+  }
+
+  private async enviarIndexedDbParaApi() {
+    const todosSeguros: Seguro[] = await this.table.toArray()
+    for(const seguro of todosSeguros) {
+      this.salvarAPI(seguro)
+      await this.table.delete(seguro.id)
+      console.log(`Seguro com id ${seguro.id} foi excluido com sucesso.`)
+    }
+  }
+
   public salvar(seguro: Seguro) {
     if(this.onlineOfflineService.isOnline) {
       this.salvarAPI(seguro)
     } else {
-      console.log('Salvar seguro no banco local')
+      this.salvarIndexedDb(seguro);
     }
   }
 
@@ -51,7 +83,7 @@ export class SeguroService {
     this.onlineOfflineService.statusConexao
       .subscribe(online => {
         if(online) {
-          console.log('enviando os dados do meu banco local para API')
+          this.enviarIndexedDbParaApi();
         } else {
           console.log('Esotu offline')
         }
